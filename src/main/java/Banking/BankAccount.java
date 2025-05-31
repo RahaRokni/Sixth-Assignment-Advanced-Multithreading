@@ -14,10 +14,10 @@ public class BankAccount {
     }
 
     public int getId(){
-        return  id;
+        return id;
     }
+
     public int getBalance() {
-        // TODO: Consider locking (if needed)
         return balance;
     }
 
@@ -26,16 +26,29 @@ public class BankAccount {
     }
 
     public void deposit(int amount) {
-        // TODO: Safely add to balance.
+
+        lock.lock();
+        balance += amount;
+        lock.unlock();
     }
 
     public void withdraw(int amount) {
-        // TODO: Safely withdraw from balance.
+        lock.lock();
+            balance -= amount;
+            lock.unlock();
     }
 
     public void transfer(BankAccount target, int amount) {
-        // TODO: Safely make the changes
-        // HINT: Both accounts need to be locked, while the changes are being made
-        // HINT: Be cautious of potential deadlocks.
+
+        BankAccount firstLock = this.id < target.id ? this : target;
+        BankAccount secondLock = this.id < target.id ? target : this;
+
+        firstLock.lock.lock();
+        secondLock.lock.lock();
+        this.balance -= amount;
+        target.balance += amount;
+        secondLock.lock.unlock();
+
+        firstLock.lock.unlock();
     }
 }
